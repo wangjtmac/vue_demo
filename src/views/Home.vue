@@ -1,18 +1,23 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <!--<input type="text" v-focus>-->
+    <div v-focus:msg.a.b.enter="message"></div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+
 
 export default {
   name: 'Home',
+  data(){
+    return {
+      message : 'some msg'
+    }
+  },
   components: {
-    HelloWorld
+
   }
 }
 </script>
