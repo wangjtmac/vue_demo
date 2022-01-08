@@ -1,0 +1,123 @@
+/*
+  *  loader_01
+  * load1：执行的动画名
+  * 1s：执行一秒
+  * infinite：执行无限次
+  * ease-in-out：动画以低速开始和结束
+  */
+@loadSize01 : 1em;
+.loader_01,
+.loader_01:before,
+.loader_01:after {
+  background: #409eff;
+  width: @loadSize01;
+  height: 4*@loadSize01;
+  animation: load1 1s infinite ease-in-out;
+}
+
+.loader_01:before,
+.loader_01:after {
+  position: absolute;
+  top: 0;
+  content: '';
+}
+
+.loader_01:before {
+  left: -1.5*@loadSize01;
+}
+
+.loader_01 {
+  text-indent: -9999em;
+  margin: 10px auto;
+  position: relative;
+  font-size: 11px;
+  /* 延时0.16s */
+  animation-delay: 0.16s;
+}
+
+.loader_01:after {
+  left: 1.5*@loadSize01;
+  /* 延时0.32s */
+  animation-delay: 0.32s;
+}
+
+@keyframes load1 {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 0 #FFF;
+    height: 4*@loadSize01;
+  }
+  40% {
+    /* 实现上部拉伸 */
+    box-shadow: 0 -2em #409eff;
+    /* 实现下部拉伸 */
+    height: 5*@loadSize01;
+  }
+}
+
+/* *
+ * loader_02
+ * load2：执行的动画名
+ * 2s：执行2秒
+ * infinite：执行无限次
+ * 1.5s：延时1.5秒
+ */
+@loadSize : 5em;
+.loader_02,
+.loader_02:before,
+.loader_02:after {
+  border-radius: 50%;
+}
+
+.loader_02:before,
+.loader_02:after {
+  position: absolute;
+  top: 0;
+  content: '';
+  width: @loadSize/2;
+  height: @loadSize;
+  border: @loadSize/10 solid #409eff;
+  box-sizing: border-box;
+}
+
+.loader_02 {
+  font-size: 10px;
+  text-indent: -99999em;
+  margin: 10px auto;
+  position: relative;
+  top: 0;
+  width: @loadSize;
+  height: @loadSize;
+  box-shadow: inset 0 0 0 @loadSize/10 #fff;
+}
+
+.loader_02:before {
+  border-radius: @loadSize/2 0 0 @loadSize/2;
+  left: 0;
+  /* 设置旋转元素的基点位置 */
+  transform-origin: @loadSize/2 @loadSize/2;
+  border-right:none;
+  .rotateAni(120deg,rotateB);
+}
+.loader_02:after {
+  border-radius: 0 @loadSize/2 @loadSize/2 0;
+  left: @loadSize/2;
+  border-left: none;
+  transform-origin: 0 @loadSize/2;
+  .rotateAni(-30deg ,rotateA);
+}
+.rotateAni(@angle , @name , @delay : 0s ,@timing : linear ){
+  transform: rotate(@angle);
+  animation: @name 1.5s infinite @timing @delay;
+  @keyframes @name {
+    0% {
+      transform: rotate(@angle);
+    }
+    100% {
+      transform: rotate(360deg + @angle);
+    }
+  }
+}
+
+

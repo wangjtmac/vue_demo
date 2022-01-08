@@ -1,33 +1,177 @@
 import Vue from 'vue'
 import App from './App.vue'
 import './registerServiceWorker'
-import router from './router'
+import routes from './router'
 import store from './store'
-
+import VueRouter from "vue-router";
 Vue.config.productionTip = false
-
-Vue.directive('focus' , {
-  bind( el , binding , vnode ){
-    let keys = [];
-    for(let i in vnode){
-      keys.push(i)
+import Axios from 'axios';
+const axios = Axios.create({
+    headers: {
+        'Content-Type': 'application/json;charset=UTF-8'
+    },
+    baseURL: "/api",
+    timeout: 1000 * 60 * 60,
+    withCredentials : true
+});
+Vue.prototype.$axios = axios;
+let router = null;
+let instance = null;
+function render(props = {}) {
+    const { container , baseUrl , routerBase , setGlobalState , globalState ,onGlobalStateChange } = props;
+    if(window.__POWERED_BY_QIANKUN__){
+        axios.defaults.baseURL = baseUrl;
+        Vue.prototype.$setGlobalState = setGlobalState;
+        store.dispatch("setGlobalState" , globalState);
+        Vue.prototype.$onGlobalStateChange = onGlobalStateChange;
+        onGlobalStateChange((state)=>{
+            store.dispatch("setGlobalState" , state);
+        });
     }
-    el.innerHTML =
-        'name :' + binding.name + '<br>' +
-        'value :' + binding.value + '<br>' +
-        'expression :' + binding.expression + '<br>' +
-        'argument :' + binding.arg + '<br>' +
-        'modifiers : ' + JSON.stringify(binding.modifiers) + '<br>' +
-        "vnode keys :" + keys.join(', ')
+    router = new VueRouter({
+        base: window.__POWERED_BY_QIANKUN__ ? routerBase : "/",
+        mode: "history",
+        routes: routes,
+    });
+    router.beforeEach((to, from, next) => {
+        //避免死循环
+        if (window.__POWERED_BY_QIANKUN__ && to.path.indexOf(routerBase) < -1) {
+            next(`${routerBase}${to.path}`);
+        } else {
+            next();
+        }
+    });
+    instance = new Vue({
+        router,
+        store ,
+        render: (h) => h(App),
+    }).$mount(container ? container.querySelector("#app") : "#app");
+}
 
-  },
-  inserted(el , binding , vnode  ){
-    el.focus();
-  }
+
+
+import VueResource from "vue-resource"
+
+Vue.use(VueResource);
+const http = {
+    headers: {
+        'Content-Type': 'application/json;charset=UTF-8'
+    },
+    timeout: 1000 * 60 * 60,
+    // root: "http://jsonplaceholder.typicode.com"
+    root: "http://127.0.0.1:8090"
+};
+Vue.http.options = http;
+
+import {
+    Message
+} from 'element-ui';
+export async function fetch(options) {
+    try {
+        let instance = await axios.create({
+            timeout: 20000, // 超时
+            headers: {
+                // 'X-touchspring-Token': store.state.user.token,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
+        let result = await instance(options);
+        result = result.data;
+        // console.log(result);
+        if (result.code === 1200 || result.code === 2000) {
+            return result;
+        } else {
+            Message({
+                message: result.message,
+                type: 'error',
+                showClose: true,
+                duration: 2 * 1000,
+            });
+        }
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+Vue.use(ElementUI , {
+    size : "small"
+});
+import VueLayoutComposer from "vue-layout-composer"
+Vue.use(VueLayoutComposer)
+
+//echarts
+import VCharts from 'v-charts'
+Vue.use(VCharts);
+import echarts from 'echarts'
+Vue.prototype.$echarts = echarts;
+
+import {globalServices} from "@/api/globalServices";
+
+Vue.prototype.$services = globalServices(true);
+
+/**
+ * 全局引入指令
+ */
+Vue.use((Vue) => {
+    ((requireContext) => {
+        const arr = requireContext.keys().map(requireContext);
+        (arr || []).forEach((directive) => {
+            directive = directive.__esModule && directive.default ? directive.default : directive;
+            Object.keys(directive).forEach((key) => {
+                Vue.directive(key, directive[key]);
+            });
+        });
+    })(require.context('@/api/directives', false, /^\.\/.*\.js$/));
 });
 
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+/*
+* 引入common文件下，共用组件
+* components/signed-components 目录下的通用组件 可全局使用不用注册
+* 该目录下的组件 新建的组件要求：建个目录，内部建vue组件，仅单个vue，若有其他引入的vue文件，需要在里面建个目录存放。
+* 例：新建个 table 目录，里面新建个 table.vue ,table.vue 需要引用 option.vue ,需要建个pages,注：目录名称必须是pages,文件名称不能有pages, 目录存放这个 option.vue
+* */
+
+function changeStr (str) {
+    return str.charAt(0).toUpperCase() + str.slice(1)
+}
+const requireComponent = require.context('@/components/common', true, /(\.\/(?:(?!pages).)+)\.vue$/);
+// 查找同级目录下以vue结尾的组件
+Vue.use((Vue) =>{
+    ((requireContext) => {
+        const arr = requireContext.keys();
+        (arr || []).forEach((fileName) => {
+            let config = requireComponent(fileName);
+            let componentName = config.default.name;
+            Vue.component(componentName, config.default || config);
+        });
+    })(requireComponent);
+});
+
+// 2. 根据全局变量window.__POWERED_BY_QIANKUN__ 判断是独立启动还是由qiankun启动
+if (window.__POWERED_BY_QIANKUN__) {
+    // eslint-disable-next-line no-undef
+    __webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
+}
+
+// 独立运行时
+if (!window.__POWERED_BY_QIANKUN__) {
+    render();
+}
+
+export async function bootstrap() {
+    console.log("[vue] vue app bootstraped");
+}
+export async function mount(props) {
+    console.log("[vue] props from main framework", props);
+    render(props);
+}
+export async function unmount() {
+    instance.$destroy();
+    instance.$el.innerHTML = "";
+    instance = null;
+    router = null;
+}
+
