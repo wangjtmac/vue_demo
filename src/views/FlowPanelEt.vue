@@ -54,6 +54,9 @@ export default {
         }
     },
     methods: {
+        setZoom(num){
+            if(this.jsPlumb)this.jsPlumb.setZoom(num);
+        },
         // 改变画布大小--通过鼠标滚轮 缩小，放大
         changeCanvas(event) {
             var delta = 0;
@@ -116,7 +119,7 @@ export default {
 
         allowDrop(e) {
             if (this.canDrop) {
-                e.preventDefault();
+               return e.preventDefault();
             }
         },
         //jsPlumb初始化
@@ -285,7 +288,7 @@ export default {
             let width = 42;
             const index = this.index++;
             let x, y;
-            if (evt.target.className === 'flowPanelEt') {
+            if (evt.target.className === 'common-panel__canvas') {
                 x = evt.offsetX - width + this.$refs.parent.scrollLeft;
                 y = evt.offsetY + this.$refs.parent.scrollTop - 25;
             } else {
@@ -354,88 +357,7 @@ export default {
 
             vm.data.nodeList.push(node);
             vm.$nextTick(function () {
-                let anchor = [], targetA;
-                if (pluginKeyWord === "unionJoinPlugin") {
-                    anchor = [[.33, 0, 0, -1], [.66, 0, 0, -1]];
-                    targetA = [[.33, 0, 0, -1], [.66, 0, 0, -1]]
-                } else {
-                    anchor = [[.5, 0, 0, -1]];
-                    targetA = [[.5, 0, 0, -1],]
-                }
-
-                const sourceLeft =
-                                {
-                                    endpoint: "Rectangle",
-                                    paintStyle: {
-                                        stroke: "#7AB02C",
-                                        fill: "transparent",
-                                        width: 30,
-                                        height: 30,
-                                        strokeWidth: 1,
-                                    },
-                                    cssClass: "ce-left",
-                                    isTarget: true,
-                                },
-                        sourceRight = {
-                            endpoint: "Rectangle",
-                            paintStyle: {
-                                stroke: "#7AB02C",
-                                fill: "transparent",
-                                width: 30,
-                                height: 30,
-                                strokeWidth: 1,
-                            },
-                            cssClass: "ce-right",
-                            isTarget: true,
-                        },
-                        sourceEndpoint = {
-                            endpoint: "Rectangle",
-                            paintStyle: {
-                                stroke: "#7AB02C",
-                                fill: "transparent",
-                                width: 60,
-                                height: 30,
-                                strokeWidth: 1,
-                            },
-                            cssClass: "ce-center",
-                            isTarget: true,
-                        };
-
-                let paintStyle = {stroke: '#66a6e0', fill: "#fff"};
-                if (transPlugins.indexOf(pluginKeyWord) > -1) {
-                    paintStyle.stroke = "#FFBB54";
-                } else if (outputPlugins.indexOf(pluginKeyWord) > -1) {
-                    paintStyle.stroke = "#66CDAA";
-                }
-
-                for (let a in anchor) {
-                    if(pluginKeyWord === "unionJoinPlugin"){
-                        let option = a === "0" ? sourceLeft : sourceRight;
-                        vm.jsPlumb.addEndpoint(nodeId, {
-                            anchor: anchor[a],
-                            ...option
-                        });
-                    }else {
-                        vm.jsPlumb.addEndpoint(nodeId, {
-                            anchor: anchor[a],
-                            ...sourceEndpoint
-                        });
-                    }
-
-                }
-                // 设置源点，可以拖出线连接其他节点
-                vm.jsPlumb.makeSource(nodeId, {
-                    filter: ".dc-link_dot",
-                    anchor: ["Bottom"]
-                });
-                // 设置目标点，其他源点拖出的线可以连接该节点
-                /*vm.jsPlumb.makeTarget(nodeId, {
-                    filter: ".dc-link_dot",
-                    anchor : targetA
-                });*/
-                vm.jsPlumb.draggable(nodeId, {
-                    containment: 'parent'
-                })
+                vm.setNodePoints(nodeId , pluginKeyWord);
             })
         },
         // 是否具有该线
@@ -499,8 +421,58 @@ export default {
         dataReload() {
             const vm = this, {modelParams} = this;
             vm.easyFlowVisible = false;
-            vm.data.nodeList = [];
-            vm.data.lineList = [];
+            vm.data.nodeList = [
+                {
+                    checkClick:true,
+                    code:"全文_1",
+                    ico:undefined,
+                    id:"6096708211178712",
+                    keyWord:"kVOutput",
+                    left:"254px",
+                    name:"全文_1",
+                    show:true,
+                    tableId:"",
+                    top:"130px",
+                    type:""
+                },{
+                    checkClick:true,
+                    code:"碰撞_2",
+                    ico:undefined,
+                    id:"1407128410003672",
+                    keyWord:"unionJoinPlugin",
+                    left:"465px",
+                    name:"碰撞_2",
+                    show:true,
+                    tableId:"",
+                    top:"291px",
+                    type:""
+                },
+                {
+                    checkClick:true,
+                    code:"输入_1",
+                    ico:undefined,
+                    id:"9089094404598265",
+                    keyWord:"inputMeta",
+                    left:"734px",
+                    name:"输入_1",
+                    show:true,
+                    tableId:"",
+                    top:"109px",
+                    type:""
+
+                }
+            ];
+            vm.data.lineList = [
+                {
+                    from : "6096708211178712" ,
+                    to : "1407128410003672",
+                    target : [.33, 0, 0, -1]
+                },{
+                    from : "9089094404598265",
+                    to : "1407128410003672",
+                    target: [.66, 0, 0, -1]
+                }
+            ];
             modelParams.loading = true;
             vm.$nextTick(() => {
                 modelParams.loading = false;
@@ -553,15 +525,15 @@ export default {
 .flowPanelEt {
     margin-right: auto;
     transition: 300ms;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    position: relative;
+    /*width: 100%;*/
+    /*height: 100%;*/
+    /*overflow: auto;*/
+    /*position: relative;*/
 }
 
 .flow_scroll {
-    height: 100%;
-    position: relative;
+    /*height: 100%;*/
+    /*position: relative;*/
 }
 
 </style>
@@ -607,17 +579,17 @@ export default {
 }
 
 .ce-left {
-    transform: translate(-15px, 15px);
+    transform: translate(-10px, 20px);
     z-index: -1;
 }
 
 .ce-right {
-    transform: translate(10px, 15px);
+    transform: translate(10px, 20px);
     z-index: -1;
 }
 
 .ce-center {
-    transform: translate(0px, 15px);
+    transform: translate(0px, 20px);
     z-index: -1;
 }
 </style>

@@ -43,7 +43,7 @@ export const flowMixins = {
                 ],
                 // 绘制线
                 PaintStyle: {stroke: '#dcdcdc', strokeWidth: 1, cornerRadius: 10,},
-                HoverPaintStyle: {strokeWidth: 2.6},
+                HoverPaintStyle: {strokeWidth: 2.6, outlineWidth: 6,},
                 // 绘制箭头
                 // Overlays: [['Arrow', {width: 12, length: 18, location: 1}]],
                 RenderMode: "svg",
@@ -101,38 +101,102 @@ export const flowMixins = {
 
                 lineList: []
             },
-
+            sourceLeft : {
+                endpoint: "Rectangle",
+                paintStyle: {
+                    stroke: "#7AB02C",
+                    fill: "transparent",
+                    width: 40,
+                    height: 50,
+                    strokeWidth: 1,
+                },
+                cssClass: "ce-left",
+                isTarget: true,
+            },
+            sourceRight : {
+                endpoint: "Rectangle",
+                paintStyle: {
+                    stroke: "#7AB02C",
+                    fill: "transparent",
+                    width: 40,
+                    height: 50,
+                    strokeWidth: 1,
+                },
+                cssClass: "ce-right",
+                isTarget: true,
+            },
+            sourceEndpoint : {
+                endpoint: "Rectangle",
+                paintStyle: {
+                    stroke: "#7AB02C",
+                    fill: "transparent",
+                    width: 80,
+                    height: 50,
+                    strokeWidth: 1,
+                },
+                cssClass: "ce-center",
+                isTarget: true,
+            }
         }
     },
     methods: {
+        setNodePoints(nodeId , pluginKeyWord){
+            const vm = this , {sourceLeft ,sourceRight ,sourceEndpoint,transPlugins, outputPlugins } = vm;
+            let anchor = [];
+            if (pluginKeyWord === "unionJoinPlugin") {
+                anchor = [[.33, 0, 0, -1], [.66, 0, 0, -1]];
+            } else {
+                anchor = [[.5, 0, 0, -1]];
+            }
+
+            let paintStyle = {stroke: '#66a6e0', fill: "#fff"};
+            if (transPlugins.indexOf(pluginKeyWord) > -1) {
+                paintStyle.stroke = "#FFBB54";
+            } else if (outputPlugins.indexOf(pluginKeyWord) > -1) {
+                paintStyle.stroke = "#66CDAA";
+            }
+
+            for (let a in anchor) {
+                if(pluginKeyWord === "unionJoinPlugin"){
+                    let option = a === "0" ? sourceLeft : sourceRight;
+                    vm.jsPlumb.addEndpoint(nodeId, {
+                        anchor: anchor[a],
+                        ...option
+                    });
+                }else {
+                    vm.jsPlumb.addEndpoint(nodeId, {
+                        anchor: anchor[a],
+                        ...sourceEndpoint
+                    });
+                }
+
+            }
+            // 设置源点，可以拖出线连接其他节点
+            vm.jsPlumb.makeSource(nodeId, {
+                filter: ".dc-link_dot",
+                anchor: ["Bottom"]
+            });
+            // 设置目标点，其他源点拖出的线可以连接该节点
+            vm.jsPlumb.draggable(nodeId, {
+                // containment: 'parent'
+            })
+        },
         // 加载流程图
         loadEasyFlow() {
+            const vm = this;
             // 初始化节点
             for (var i = 0; i < this.data.nodeList.length; i++) {
-                let node = this.data.nodeList[i];
-                // 设置源点，可以拖出线连接其他节点
-                this.jsPlumb.makeSource(node.id, this.jsplumbSourceOptions);
-                // // 设置目标点，其他源点拖出的线可以连接该节点
-                this.jsPlumb.makeTarget(node.id, this.jsplumbTargetOptions);
-                // jsPlumb.addEndpoint(node.id)
-                // 设置可拖拽
-                // jsPlumb.draggable(node.id, {
-                //     containment: 'parent',
-                //     grid: [10, 10]
-                // })
-
-                this.jsPlumb.draggable(node.id, {
-                    containment: 'parent'
-                })
-
-                // jsPlumb.draggable(node.id)
+                let node = this.data.nodeList[i],
+                pluginKeyWord = node.keyWord;
+                vm.setNodePoints(node.id , pluginKeyWord);
             }
             // 初始化连线
             for (let i = 0; i < this.data.lineList.length; i++) {
-                let line = this.data.lineList[i];
+                let line = this.data.lineList[i] , {target} = line
                 this.jsPlumb.connect({
                     source: line.from,
                     target: line.to,
+                    anchors:["Bottom", target ],
                 }, this.jsplumbConnectOptions)
             }
             this.$nextTick(function () {

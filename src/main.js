@@ -1,20 +1,54 @@
 import Vue from 'vue'
 import App from './App.vue'
 import './registerServiceWorker'
-import router from './router'
+import routes from './router'
 import store from './store'
-
+import VueRouter from "vue-router";
 Vue.config.productionTip = false
 import Axios from 'axios';
-
 const axios = Axios.create({
     headers: {
         'Content-Type': 'application/json;charset=UTF-8'
     },
     baseURL: "/api",
-    timeout: 1000 * 60 * 60
+    timeout: 1000 * 60 * 60,
+    withCredentials : true
 });
 Vue.prototype.$axios = axios;
+let router = null;
+let instance = null;
+function render(props = {}) {
+    const { container , baseUrl , routerBase , setGlobalState , globalState ,onGlobalStateChange } = props;
+    if(window.__POWERED_BY_QIANKUN__){
+        axios.defaults.baseURL = baseUrl;
+        Vue.prototype.$setGlobalState = setGlobalState;
+        store.dispatch("setGlobalState" , globalState);
+        Vue.prototype.$onGlobalStateChange = onGlobalStateChange;
+        onGlobalStateChange((state)=>{
+            store.dispatch("setGlobalState" , state);
+        });
+    }
+    router = new VueRouter({
+        base: window.__POWERED_BY_QIANKUN__ ? routerBase : "/",
+        mode: "history",
+        routes: routes,
+    });
+    router.beforeEach((to, from, next) => {
+        //避免死循环
+        if (window.__POWERED_BY_QIANKUN__ && to.path.indexOf(routerBase) < -1) {
+            next(`${routerBase}${to.path}`);
+        } else {
+            next();
+        }
+    });
+    instance = new Vue({
+        router,
+        store ,
+        render: (h) => h(App),
+    }).$mount(container ? container.querySelector("#app") : "#app");
+}
+
+
 
 import VueResource from "vue-resource"
 
@@ -43,7 +77,7 @@ export async function fetch(options) {
         });
         let result = await instance(options);
         result = result.data;
-        console.log(result);
+        // console.log(result);
         if (result.code === 1200 || result.code === 2000) {
             return result;
         } else {
@@ -59,17 +93,25 @@ export async function fetch(options) {
     }
 }
 
+
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(ElementUI , {
     size : "small"
 });
+import VueLayoutComposer from "vue-layout-composer"
+Vue.use(VueLayoutComposer)
 
 //echarts
 import VCharts from 'v-charts'
 Vue.use(VCharts);
 import echarts from 'echarts'
 Vue.prototype.$echarts = echarts;
+
+import {globalServices} from "@/api/globalServices";
+
+Vue.prototype.$services = globalServices(true);
+
 /**
  * 全局引入指令
  */
@@ -108,8 +150,28 @@ Vue.use((Vue) =>{
     })(requireComponent);
 });
 
-new Vue({
-    router,
-    store,
-    render: h => h(App)
-}).$mount('#app')
+// 2. 根据全局变量window.__POWERED_BY_QIANKUN__ 判断是独立启动还是由qiankun启动
+if (window.__POWERED_BY_QIANKUN__) {
+    // eslint-disable-next-line no-undef
+    __webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
+}
+
+// 独立运行时
+if (!window.__POWERED_BY_QIANKUN__) {
+    render();
+}
+
+export async function bootstrap() {
+    console.log("[vue] vue app bootstraped");
+}
+export async function mount(props) {
+    console.log("[vue] props from main framework", props);
+    render(props);
+}
+export async function unmount() {
+    instance.$destroy();
+    instance.$el.innerHTML = "";
+    instance = null;
+    router = null;
+}
+

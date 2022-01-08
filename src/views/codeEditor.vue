@@ -137,6 +137,9 @@ export default {
                 }, {
                     value: 'markdown',
                     label: 'Markdown'
+                },{
+                    value : "application/json" ,
+                    label: "application/json"
                 }]
         }
     },
@@ -165,9 +168,35 @@ export default {
                 to: {ch: token.end, line: cursor.line},
             };
         },
+        handleShowHint(cm){
+            const codeMirrorInstance = cm;
+            const cur = this.coder.getCursor();
+            const curLine = this.coder.getLine(cur.line);
+            const end = cur.ch;
+            const start = end;
+            let list = [];
+            // 根据不同情况给list赋值，默认为[]，即不显示提示框。
+            const cursorTwoCharactersBefore = `${curLine.charAt(start - 2)}${curLine.charAt(start - 1)}`;
+            debugger
+            const {activeItem, openedItemsData} = this.props.configureStore;
+            const {variablePool} = openedItemsData[activeItem].config;
+            const variablePoolKeys = variablePool ? Object.keys(variablePool): [];
+            if(cursorTwoCharactersBefore === '${'){
+                list = variablePoolKeys;
+            }else if(cursorTwoCharactersBefore === '::'){
+                const lastIndex = curLine.lastIndexOf('${', start);
+                const modelId = curLine.substring(lastIndex + 2, start - 2);
+                if(lastIndex !== -1 && modelId && variablePool[modelId]){
+                    list = variablePool[modelId].attributes.concat(variablePool[modelId].points);
+                }else {
+                    list = [];
+                }
+            }
+            return {list: list, from: codeMirrorInstance.Pos(cur.line, start), to: codeMirrorInstance.Pos(cur.line, end)};
+        },
         ctrlOption(cm){
             let list = ['to_array'];
-            return this.showOption(cm,list);
+            return this.handleShowHint(cm,list);
         },
         altOption(cm){
             let list = ['to_string'];
@@ -201,7 +230,8 @@ export default {
 
                 // 判断父容器传入的语法是否被支持
                 if (modeObj) {
-                    this.mode = modeObj.label
+                    this.mode = modeObj.label;
+                    this.changeMode(this.mode);
                 }
             }
         }

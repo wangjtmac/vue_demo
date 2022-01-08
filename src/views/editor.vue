@@ -1,6 +1,6 @@
 <template>
     <div class="editor">
-       <code-editor v-model="code" language="x-sql"></code-editor>
+       <code-editor v-model="code" language="application/json"></code-editor>
     </div>
 </template>
 

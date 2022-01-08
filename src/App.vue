@@ -1,27 +1,55 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link> |
-      <router-link to="/directive">directive</router-link> |
-      <router-link to="/charts">charts</router-link> |
-      <router-link to="/highchart">highchart</router-link> |
-      <router-link to="/relation">relation</router-link> |
-      <router-link to="/jsplumb">jsplumb</router-link> |
-      <router-link to="/echarts">echarts</router-link> |
-      <router-link to="/editor">editor</router-link> |
+    <div id="app">
+        <nav-bar :data="menus" router
+                 background-color="#545c64"
+                 text-color="#fff"
+                 active-text-color="#ffd04b"
+                 @select="selectMenu"></nav-bar>
+        <div class="container">
+            <router-view/>
+        </div>
     </div>
-    <router-view/>
-  </div>
 </template>
 <script>
-  export default {
+import navBar from "@/components/navBar";
+import {getMenu} from "@/router/index.js"
+export default {
+    components : {
+        navBar
+    },
+    computed: {
+        menus(){
+            let list = [];
+            list = getMenu();
+            list = list.map( (item , i) => {
+                return {
+                    label : item.name ,
+                    k : i+'',
+                    path : item.path
+                }
+            })
+            return list;
+        }
+    },
+    data(){
+        return {
+
+        }
+    },
+    methods : {
+        selectMenu(list){
+
+        }
+    },
     created() {
 
     }
-  }
+}
 </script>
 <style scoped>
 @import "../public/css/reset.css";
 @import "../public/css/zxx.lib.css";
+.container {
+    height: calc(100vh - 61px);
+}
 </style>

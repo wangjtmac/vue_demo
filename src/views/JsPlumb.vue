@@ -13,8 +13,19 @@
             </ul>
         </div>
         <!-- 右侧内容区 -->
-        <div class="canvas-content" :max-x="1920" :max-y="2000" :min-x="-1920" :min-y="-600">
-            <flow-panel-et  class="common-panel" ref="flow" :modelParams="{loading:false}"/>
+        <div class="canvas-content" @dragover="allowDrop"
+             @drop="drop">
+            <common-panel ref="panel"
+                          :max-x="maxX" :max-y="maxY"
+                          :min-x="minX" :min-y="minY"
+                          :zoom="panel.zoom"
+                          :x="panel.x"
+                          :y="panel.y"
+                          @changeZoom="updatePos"
+            >
+                <flow-panel-et  ref="flow" :modelParams="{loading:false}"/>
+            </common-panel>
+
         </div>
     </div>
 </template>
@@ -23,10 +34,47 @@
 import FlowPanelEt from "@/views/FlowPanelEt";
 import {DemoJsplumb} from "@/views/jsplumb";
 import commonPanel from "@/components/common-panel"
+
 export default {
     name: "JsPlumb",
     mixins:[DemoJsplumb],
     components:{FlowPanelEt,commonPanel},
+    computed: {
+        maxX(){
+            return window.screen.width;
+        },
+        maxY (){
+            return window.screen.height;
+        },
+        minX(){
+            return -1* window.screen.width;
+        },
+        minY(){
+            return -1 * window.screen.height;
+        }
+    },
+    data(){
+        return {
+            panel : {
+                x : 0 ,
+                y : 0,
+                zoom : 1,
+            }
+        }
+    },
+    methods : {
+        updatePos(arg){
+            const vm = this;
+            vm.panel = arg;
+            this.$refs.flow.setZoom(arg.zoom);
+        },
+        allowDrop(e){
+            this.$refs.flow.allowDrop(e);
+        },
+        drop(e){
+            this.$refs.flow.drop(e);
+        },
+    }
 
 }
 </script>
@@ -72,6 +120,7 @@ export default {
 .canvas-content{
     flex: 1;
     background: lightcyan;
+    position: relative;
 }
 .canvas-con{
     width: 100%;

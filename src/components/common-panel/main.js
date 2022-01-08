@@ -276,7 +276,6 @@ export default {
             const vm = this;
             if (vm.isToMove && vm.isMouseDownOnPanel(e)) {
                 e.stopPropagation();
-
                 vm.isMoving = true;
                 vm._moveHelper.start(vm.validX, vm.validY, e);
                 document.body.style.cursor = 'grabbing';
@@ -288,6 +287,7 @@ export default {
          */
         handleCanvasMoving(data, isFirst, e) {
             const vm = this;
+            console.log(data)
             vm.checkChange(data.x, data.y, vm.validZoom);
         },
 
@@ -455,7 +455,6 @@ export default {
         vm.handleScrollPanelThrottle = throttle(this.handleScrollPanel, 50);
 
         vm._moveHelper = new MouseMoveHelper(vm.handleCanvasMoving, vm.handleCanvasMoveEnd, ['click', 'mousewheel']);
-        console.log(vm._moveHelper)
     },
     mounted() {
     },
