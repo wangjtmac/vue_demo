@@ -40,7 +40,7 @@ export const echartsOpt = {
         function findIndex(level , label){
             let inx ;
             level.forEach((l , i)=>{
-                if(l.label === label) inx = i;
+                if(l.label === label) {inx = i}
             })
             return inx;
         }
@@ -51,8 +51,8 @@ export const echartsOpt = {
                 let xInx = findIndex(xLevel , item.x),
                     yInx = findIndex(level , item.y),
                     x  = getRandom(xInx * xInterval , (xInx+1) * xInterval) ,
-                    y  = getRandom(yInx * interval , (yInx+1) * interval) ;
-                return [x,y];
+                    y  = getRandom(yInx * interval , (yInx+1) * interval)
+                return [x,y]
             })
         }
 

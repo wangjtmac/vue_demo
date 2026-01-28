@@ -6,7 +6,7 @@
 import G6 from "@antv/g6";
 
 export default {
-    name: "graph",
+    name: "Graph",
     data() {
         return {
             graph: null,
@@ -68,9 +68,18 @@ export default {
             filter_rule: {}
         }
     },
+    created() {
+    },
+    mounted() {
+        window.addEventListener("resize", this.wordRender);
+    },
+    beforeDestroy() {
+        if (this.graph) {this.graph.destroy();}
+        window.removeEventListener("resize", this.wordRender);
+    },
     methods: {
         clearWord() {
-            if (this.graph) this.graph.clear();
+            if (this.graph) {this.graph.clear();}
             this.nodeData = {
                 nodes: [],
                 edges: [],
@@ -191,15 +200,6 @@ export default {
                 });
             }
         },
-    },
-    created() {
-    },
-    mounted() {
-        window.addEventListener("resize", this.wordRender);
-    },
-    beforeDestroy() {
-        if (this.graph) this.graph.destroy();
-        window.removeEventListener("resize", this.wordRender);
     }
 }
 </script>

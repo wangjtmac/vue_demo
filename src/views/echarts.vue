@@ -3,21 +3,36 @@
         <h4 class="title">Line charts</h4>
         <div class="chartContain">
             <com-chart :options="option1"></com-chart>
-            <bubble-chart></bubble-chart>
+            <bubble-chart :data="bubbleData"></bubble-chart>
         </div>
     </div>
 </template>
 
 <script>
-import ComChart from "@/components/com-chart"
-import {echartsOpt} from "@/assets/echartsOptions";
-import bubbleChart from "@/components/bubble-chart"
+import { echartsOpt } from "@/assets/echartsOptions.js";
+import bubbleChart from "@/components/bubble-chart";
+import ComChart from "@/components/com-chart";
+
 export default {
-    name: "echarts",
-    mixins: [echartsOpt],
+    name: "Echarts",
     components: {
         ComChart ,
         bubbleChart
+    },
+    mixins: [echartsOpt],
+    data() {
+        return {
+            bubbleData: [
+                {
+                    condition: ["不说", "只做"],
+                    number: 5
+                },
+                {
+                    condition: ["只说", "不做"],
+                    number: 5
+                }
+            ]
+        }
     }
 }
 </script>

@@ -1,0 +1,67 @@
+# EditorConfig 配置文件
+# 详情请见: https://editorconfig.org
+
+# 根配置文件，表示这是最高层级的配置
+root = true
+
+# 所有文件的默认配置
+[*]
+# 字符编码
+charset = utf-8
+# 缩进风格：空格
+indent_style = space
+# 缩进大小：2个空格
+indent_size = 2
+# 行尾样式：LF（Unix风格）
+end_of_line = lf
+# 在文件末尾插入新行
+insert_final_newline = true
+# 删除行尾空格
+trim_trailing_whitespace = true
+
+# JavaScript 文件
+[*.js]
+# 缩进大小：2个空格
+indent_size = 2
+
+# TypeScript 文件
+[*.ts]
+# 缩进大小：2个空格
+indent_size = 2
+
+# Vue 文件
+[*.vue]
+# 缩进大小：2个空格
+indent_size = 2
+
+# JSON 文件
+[*.json]
+# 缩进大小：2个空格
+indent_size = 2
+
+# YAML 文件
+[*.{yml,yaml}]
+# 缩进大小：2个空格
+indent_size = 2
+
+# Markdown 文件
+[*.md]
+# 缩进大小：2个空格
+indent_size = 2
+# Markdown 文件不删除行尾空格（因为两个空格表示换行）
+trim_trailing_whitespace = false
+
+# HTML、CSS、Less 文件
+[*.{html,css,less,scss,sass}]
+# 缩进大小：2个空格（与Vue项目保持一致）
+indent_size = 2
+
+# 配置文件
+[*.{xml,ini}]
+# 缩进大小：2个空格
+indent_size = 2
+
+# Shell 脚本
+[*.sh]
+# 缩进大小：2个空格
+indent_size = 2

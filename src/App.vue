@@ -11,17 +11,20 @@
       <router-link to="/echarts">echarts</router-link> |
       <router-link to="/editor">editor</router-link> |
     </div>
-    <router-view/>
+    <router-view />
   </div>
 </template>
 <script>
-  export default {
-    created() {
-
+export default {
+  name: 'App',
+  data() {
+    return {
     }
-  }
+  },
+  created() {}
+}
 </script>
 <style scoped>
-@import "../public/css/reset.css";
-@import "../public/css/zxx.lib.css";
+@import '../public/css/reset.css';
+@import '../public/css/zxx.lib.css';
 </style>

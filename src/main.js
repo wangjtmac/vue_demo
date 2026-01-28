@@ -1,11 +1,20 @@
-import Vue from 'vue'
-import App from './App.vue'
-import './registerServiceWorker'
-import router from './router'
-import store from './store'
+import "./registerServiceWorker";
+import "element-ui/lib/theme-chalk/index.css";
+
+import Vue from "vue";
+
+import Axios from "axios";
+import echarts from "echarts";
+import ElementUI, { Message } from "element-ui";
+//echarts
+import VCharts from "v-charts";
+import VueResource from "vue-resource";
+
+import App from "./App.vue";
+import router from "./router";
+import store from "./store";
 
 Vue.config.productionTip = false
-import Axios from 'axios';
 
 const axios = Axios.create({
     headers: {
@@ -16,7 +25,7 @@ const axios = Axios.create({
 });
 Vue.prototype.$axios = axios;
 
-import VueResource from "vue-resource"
+
 
 Vue.use(VueResource);
 const http = {
@@ -29,9 +38,6 @@ const http = {
 };
 Vue.http.options = http;
 
-import {
-    Message
-} from 'element-ui';
 export async function fetch(options) {
     try {
         let instance = await axios.create({
@@ -46,29 +52,25 @@ export async function fetch(options) {
         console.log(result);
         if (result.code === 1200 || result.code === 2000) {
             return result;
-        } else {
+        }
             Message({
                 message: result.message,
                 type: 'error',
                 showClose: true,
                 duration: 2 * 1000,
             });
-        }
+
     } catch (err) {
         console.log(err)
     }
 }
 
-import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(ElementUI , {
     size : "small"
 });
 
-//echarts
-import VCharts from 'v-charts'
 Vue.use(VCharts);
-import echarts from 'echarts'
+
 Vue.prototype.$echarts = echarts;
 /**
  * 全局引入指令
